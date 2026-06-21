@@ -6,7 +6,7 @@
 <title>ميزان الدراسة — السادس الإعدادي</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<script src="https://www.youtube.com/iframe_api"></script>
+<script src="https://www.youtube.com/iframe_api" defer></script>
 
 <style>
 :root{
@@ -1961,22 +1961,29 @@ function _ytCreatePlayer(id, title) {
   if (!wrap) return;
   // destroy old player
   if (ytPlayer) { try { ytPlayer.destroy(); } catch{} ytPlayer = null; }
-
-  // create fresh inner div each time (fixes black screen on iPad PWA)
   wrap.innerHTML = '';
-  const innerDiv = document.createElement('div');
-  innerDiv.id = 'yt-inner';
-  wrap.appendChild(innerDiv);
 
   // stop old watch timer
   _ytStopWatch();
 
-  ytPlayer = new YT.Player('yt-inner', {
+  // iOS PWA fix: نبني div داخلي جديد بدل إعادة استخدام نفس الـ div
+  const inner = document.createElement('div');
+  inner.id = 'yt-player-inner';
+  wrap.appendChild(inner);
+
+  ytPlayer = new YT.Player('yt-player-inner', {
     videoId: id,
-    playerVars: { rel:0, playsinline:1 }, // no autoplay param — fixes mobile
+    playerVars: { autoplay:1, rel:0, playsinline:1, fs:1 },
     events: {
       onReady: (e) => {
-        e.target.playVideo(); // triggered by user action, works on all devices
+        // iOS PWA fix: أضف allow attributes على الـ iframe مباشرة
+        const iframe = wrap.querySelector('iframe');
+        if (iframe) {
+          iframe.setAttribute('allow', 'autoplay; fullscreen; encrypted-media; picture-in-picture');
+          iframe.setAttribute('allowfullscreen', '');
+          iframe.setAttribute('playsinline', '');
+        }
+        e.target.playVideo();
         toast('▶ تم تشغيل الفيديو','ok');
       },
       onStateChange: (e) => {
