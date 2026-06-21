@@ -6,7 +6,7 @@
 <title>ميزان الدراسة — السادس الإعدادي</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<script src="https://www.youtube.com/iframe_api" defer></script>
+<script src="https://www.youtube.com/iframe_api"></script>
 
 <style>
 :root{
@@ -462,12 +462,13 @@ select option{background:#11152e}
 .yt-player-wrap{
   position:relative;width:100%;border-radius:16px;overflow:hidden;margin-bottom:.9rem;
   border:1px solid var(--br);background:#000;box-shadow:0 8px 30px rgba(0,0,0,.5);
+  aspect-ratio:16/9;
 }
-.yt-player-wrap>div{display:block;width:100%;aspect-ratio:16/9}
-#yt-player-div{border-radius:16px;overflow:hidden}
-#yt-player-div iframe{border-radius:16px}
-#yt-player-inner{width:100%;aspect-ratio:16/9;display:block;}
-#yt-player-inner iframe{width:100%!important;height:100%!important;border-radius:16px;}
+.yt-player-wrap>div{display:block;width:100%;height:100%}
+#yt-player-div{width:100%;height:100%;border-radius:16px;overflow:hidden}
+#yt-player-div iframe{width:100%!important;height:100%!important;border-radius:16px;display:block}
+#yt-player-inner{width:100%;height:100%;display:block;}
+#yt-player-inner iframe{width:100%!important;height:100%!important;border-radius:16px;display:block;}
 .yt-now-playing{display:none;padding:1rem 1.1rem;margin-bottom:.9rem;align-items:center;gap:.8rem}
 .yt-now-playing.show{display:flex}
 .yt-np-thumb{width:64px;height:48px;border-radius:8px;object-fit:cover;flex-shrink:0;background:var(--c2)}
@@ -934,8 +935,13 @@ select option{background:#11152e}
       </div>
 
       <!-- Player using YouTube IFrame API -->
-      <div class="yt-player-wrap" id="yt-player-wrap" style="display:none">
-        <div id="yt-player-div" style="width:100%;aspect-ratio:16/9"></div>
+      <div style="position:relative;margin-bottom:.9rem;display:none" id="yt-player-wrap">
+        <div class="yt-player-wrap" style="margin-bottom:0;border-radius:16px 16px 0 0">
+          <div id="yt-player-div" style="width:100%;height:100%"></div>
+        </div>
+        <button onclick="ytFullscreen()" style="width:100%;padding:.55rem;background:rgba(0,0,0,.6);border:1px solid var(--br);border-top:none;border-radius:0 0 16px 16px;color:var(--ink2);font-family:'Tajawal',sans-serif;font-size:.82rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.4rem">
+          <span>⛶</span> شاشة كاملة
+        </button>
       </div>
 
       <!-- Fallback (when API fails) -->
@@ -1958,6 +1964,14 @@ function ytPlay(id, title) {
   _ytCreatePlayer(id, title);
 }
 
+window.ytFullscreen = () => {
+  const iframe = document.querySelector('#yt-player-div iframe, #yt-player-inner iframe');
+  if (!iframe) return;
+  if (iframe.requestFullscreen) iframe.requestFullscreen();
+  else if (iframe.webkitRequestFullscreen) iframe.webkitRequestFullscreen();
+  else if (iframe.webkitEnterFullscreen) iframe.webkitEnterFullscreen();
+};
+
 function _ytCreatePlayer(id, title) {
   const wrap = G('yt-player-div');
   if (!wrap) return;
@@ -1968,9 +1982,10 @@ function _ytCreatePlayer(id, title) {
   // stop old watch timer
   _ytStopWatch();
 
-  // iOS PWA fix: نبني div داخلي جديد بدل إعادة استخدام نفس الـ div
+  // iOS PWA fix: نبني div داخلي جديد
   const inner = document.createElement('div');
   inner.id = 'yt-player-inner';
+  inner.style.cssText = 'width:100%;height:100%;display:block';
   wrap.appendChild(inner);
 
   ytPlayer = new YT.Player('yt-player-inner', {
@@ -1978,12 +1993,15 @@ function _ytCreatePlayer(id, title) {
     playerVars: { autoplay:1, rel:0, playsinline:1, fs:1 },
     events: {
       onReady: (e) => {
-        // iOS PWA fix: أضف allow attributes على الـ iframe مباشرة
+        // iOS PWA fix
         const iframe = wrap.querySelector('iframe');
         if (iframe) {
           iframe.setAttribute('allow', 'autoplay; fullscreen; encrypted-media; picture-in-picture');
           iframe.setAttribute('allowfullscreen', '');
           iframe.setAttribute('playsinline', '');
+          iframe.style.width = '100%';
+          iframe.style.height = '100%';
+          iframe.style.display = 'block';
         }
         e.target.playVideo();
         toast('▶ تم تشغيل الفيديو','ok');
