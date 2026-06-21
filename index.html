@@ -466,31 +466,6 @@ select option{background:#11152e}
 .yt-player-wrap>div{display:block;width:100%;aspect-ratio:16/9}
 #yt-player-div{border-radius:16px;overflow:hidden}
 #yt-player-div iframe{border-radius:16px}
-.yt-fs-btn{
-  position:absolute;bottom:10px;left:10px;
-  width:36px;height:36px;border-radius:10px;border:none;cursor:pointer;
-  background:rgba(0,0,0,.55);color:#fff;font-size:1.25rem;
-  display:flex;align-items:center;justify-content:center;
-  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
-  transition:background .2s,transform .15s;z-index:10;
-}
-.yt-fs-btn:hover{background:rgba(139,92,246,.7);transform:scale(1.1)}
-.yt-player-wrap.yt-fullscreen{
-  position:fixed!important;inset:0!important;z-index:9999!important;
-  width:100vw!important;height:100dvh!important;
-  border-radius:0!important;margin:0!important;
-  background:#000!important;
-}
-.yt-player-wrap.yt-fullscreen #yt-player-div{
-  width:100%!important;height:100%!important;
-  aspect-ratio:unset!important;border-radius:0!important;
-}
-.yt-player-wrap.yt-fullscreen #yt-player-div iframe{
-  width:100%!important;height:100%!important;border-radius:0!important;
-}
-.yt-player-wrap.yt-fullscreen .yt-fs-btn{
-  bottom:20px;left:20px;width:44px;height:44px;font-size:1.4rem;
-}
 .yt-now-playing{display:none;padding:1rem 1.1rem;margin-bottom:.9rem;align-items:center;gap:.8rem}
 .yt-now-playing.show{display:flex}
 .yt-np-thumb{width:64px;height:48px;border-radius:8px;object-fit:cover;flex-shrink:0;background:var(--c2)}
@@ -959,7 +934,6 @@ select option{background:#11152e}
       <!-- Player using YouTube IFrame API -->
       <div class="yt-player-wrap" id="yt-player-wrap" style="display:none">
         <div id="yt-player-div" style="width:100%;aspect-ratio:16/9"></div>
-        <button class="yt-fs-btn" id="yt-fs-btn" onclick="ytToggleFullscreen()" title="تكبير">⛶</button>
       </div>
 
       <!-- Fallback (when API fails) -->
@@ -2067,51 +2041,6 @@ function ytOnLeave() {
   _ytStopWatch();
   _ytSaveWatchPts();
 }
-
-// ── Fullscreen toggle ──
-window.ytToggleFullscreen = () => {
-  const wrap = G('yt-player-wrap');
-  const btn  = G('yt-fs-btn');
-  if (!wrap) return;
-
-  // Try native fullscreen first (works on Android Chrome)
-  if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-    const req = wrap.requestFullscreen || wrap.webkitRequestFullscreen;
-    if (req) {
-      req.call(wrap).catch(() => ytFallbackFullscreen(wrap, btn));
-      return;
-    }
-  } else {
-    const ex = document.exitFullscreen || document.webkitExitFullscreen;
-    if (ex) { ex.call(document); return; }
-  }
-  ytFallbackFullscreen(wrap, btn);
-};
-
-function ytFallbackFullscreen(wrap, btn) {
-  const isFs = wrap.classList.toggle('yt-fullscreen');
-  if (btn) btn.textContent = isFs ? '✕' : '⛶';
-  document.body.style.overflow = isFs ? 'hidden' : '';
-}
-
-document.addEventListener('fullscreenchange', () => {
-  const btn = G('yt-fs-btn');
-  if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-    if (btn) btn.textContent = '⛶';
-  } else {
-    if (btn) btn.textContent = '✕';
-  }
-});
-document.addEventListener('webkitfullscreenchange', () => {
-  const btn = G('yt-fs-btn');
-  if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-    if (btn) btn.textContent = '⛶';
-    const wrap = G('yt-player-wrap');
-    if (wrap) { wrap.classList.remove('yt-fullscreen'); document.body.style.overflow = ''; }
-  } else {
-    if (btn) btn.textContent = '✕';
-  }
-});
 
 // ── YT Search (via open noembed / oEmbed) ──
 window.ytSearch = async () => {
