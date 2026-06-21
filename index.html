@@ -6,7 +6,7 @@
 <title>ميزان الدراسة — السادس الإعدادي</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<script src="https://www.youtube.com/iframe_api"></script>
+<script src="https://www.youtube.com/iframe_api" defer></script>
 
 <style>
 :root{
@@ -460,7 +460,7 @@ select option{background:#11152e}
 .yt-input-row input{margin-bottom:0;flex:1}
 .yt-input-row button{margin:0;width:auto;padding:.85rem 1.1rem;flex-shrink:0;border-radius:12px}
 .yt-player-wrap{
-  position:relative;width:100%;border-radius:16px;overflow:hidden;margin-bottom:.9rem;
+  position:relative;width:100%;border-radius:16px;overflow:hidden;margin-bottom:0;
   border:1px solid var(--br);background:#000;box-shadow:0 8px 30px rgba(0,0,0,.5);
   aspect-ratio:16/9;
 }
@@ -935,12 +935,12 @@ select option{background:#11152e}
       </div>
 
       <!-- Player using YouTube IFrame API -->
-      <div style="position:relative;margin-bottom:.9rem;display:none" id="yt-player-wrap">
-        <div class="yt-player-wrap" style="margin-bottom:0;border-radius:16px 16px 0 0">
+      <div id="yt-player-wrap" style="display:none;margin-bottom:.9rem">
+        <div class="yt-player-wrap">
           <div id="yt-player-div" style="width:100%;height:100%"></div>
         </div>
-        <button onclick="ytFullscreen()" style="width:100%;padding:.55rem;background:rgba(0,0,0,.6);border:1px solid var(--br);border-top:none;border-radius:0 0 16px 16px;color:var(--ink2);font-family:'Tajawal',sans-serif;font-size:.82rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.4rem">
-          <span>⛶</span> شاشة كاملة
+        <button onclick="ytFullscreen()" style="width:100%;padding:.6rem;background:rgba(0,0,0,.5);border:1px solid var(--br);border-top:none;border-radius:0 0 16px 16px;color:var(--ink2);font-family:'Tajawal',sans-serif;font-size:.82rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.4rem">
+          ⛶ شاشة كاملة
         </button>
       </div>
 
@@ -1993,15 +1993,13 @@ function _ytCreatePlayer(id, title) {
     playerVars: { autoplay:1, rel:0, playsinline:1, fs:1 },
     events: {
       onReady: (e) => {
-        // iOS PWA fix
+        // iOS PWA fix: أضف allow attributes على الـ iframe
         const iframe = wrap.querySelector('iframe');
         if (iframe) {
           iframe.setAttribute('allow', 'autoplay; fullscreen; encrypted-media; picture-in-picture');
           iframe.setAttribute('allowfullscreen', '');
           iframe.setAttribute('playsinline', '');
-          iframe.style.width = '100%';
-          iframe.style.height = '100%';
-          iframe.style.display = 'block';
+          iframe.style.cssText = 'width:100%;height:100%;display:block';
         }
         e.target.playVideo();
         toast('▶ تم تشغيل الفيديو','ok');
